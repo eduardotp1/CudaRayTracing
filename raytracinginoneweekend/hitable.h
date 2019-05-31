@@ -32,7 +32,3 @@ class hitable  {
 };
 
 #endif
-
-
-
-
