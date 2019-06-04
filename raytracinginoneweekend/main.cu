@@ -18,6 +18,7 @@
 // #include "material.h"
 #include "vec3.h"
 #include "ray.h"
+#include <chrono>
 
 // traca os raios de luz
 __device__ vec3 color(const ray& r, hitable **world) {
@@ -102,6 +103,7 @@ int main() {
     int ty = 8;//divisoes que vai ser cortada a imagem
     int num_pixels = nx*ny;
     size_t fb_size = num_pixels*sizeof(vec3);
+    using namespace std::chrono;
     high_resolution_clock::time_point begin = high_resolution_clock::now();
 
     // allocate FB
