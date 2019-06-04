@@ -74,7 +74,7 @@ int main() {
     int tx = 8;//divisoes que vai ser cortada a imagem
     int ty = 8;//divisoes que vai ser cortada a imagem
     int num_pixels = nx*ny;
-    size_t fb_size = 3*num_pixels*sizeof(float);
+    size_t fb_size = 3*num_pixels*sizeof(vec3);
 
     // allocate FB
     vec3 *fb;
