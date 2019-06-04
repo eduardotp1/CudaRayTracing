@@ -78,16 +78,12 @@ int main() {
 
     // allocate FB
     vec3 *fb;
-    double lower_left_corner=vec3(-2.0, -1.0, -1.0);
-    double horizontal=vec3(4.0, 0.0, 0.0);
-    double vertical=vec3(0.0, 2.0, 0.0);
-    double origin=vec3(0.0, 0.0, 0.0);
     cudaMallocManaged((void **)&fb, fb_size);
 
     dim3 block_size(nx/tx+1,ny/ty+1);//tamanho de cada grid
     dim3 size_grid(tx,ty);//tamanho do grid
 
-    render<<<block_size, size_grid>>>(fb, nx, ny, lower_left_corner, horizontal, vertical, origin);//manda para a GPU calcular
+    render<<<block_size, size_grid>>>(fb, nx, ny, vec3(-2.0, -1.0, -1.0), vec3(4.0, 0.0, 0.0), vec3(0.0, 2.0, 0.0), vec3(0.0, 0.0, 0.0));//manda para a GPU calcular
     cudaGetLastError();
     cudaDeviceSynchronize();
 
