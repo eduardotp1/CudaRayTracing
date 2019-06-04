@@ -59,6 +59,7 @@ __device__ vec3 color(const ray& r) {
 // }
 
 __global__ void render(vec3 *fb, int max_x, int max_y, vec3 lower_left_corner, vec3 horizontal, vec3 vertical, vec3 origin) {
+   std::cerr << "aquirender \n";
    int i = threadIdx.x + blockIdx.x * blockDim.x;
    int j = threadIdx.y + blockIdx.y * blockDim.y;
    if((i >= max_x) || (j >= max_y)) return;
@@ -84,10 +85,11 @@ int main() {
 
     dim3 block_size(nx/tx+1,ny/ty+1);//tamanho de cada grid
     dim3 size_grid(tx,ty);//tamanho do grid
-
+    std::cerr << "aqui1 \n";
     render<<<block_size, size_grid>>>(fb, nx, ny, vec3(-2.0, -1.0, -1.0), vec3(4.0, 0.0, 0.0), vec3(0.0, 2.0, 0.0), vec3(0.0, 0.0, 0.0));//manda para a GPU calcular
     cudaGetLastError();
     cudaDeviceSynchronize();
+    std::cerr << "aqui2 \n";
 
     std::cout << "P3\n" << nx << " " << ny << "\n255\n";
     // hitable *list[5];
@@ -95,6 +97,8 @@ int main() {
     for (int j = ny-1; j >= 0; j--) {
         for (int i = 0; i < nx; i++) {
             size_t pixel_index = j*nx + i*;
+
+            std::cerr << "aqui3 \n";
             // size_t pixel_index = j*3*nx + i*3;
             int ir = int(255.99*fb[pixel_index].r());
             int ig = int(255.99*fb[pixel_index].g());
