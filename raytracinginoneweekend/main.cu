@@ -91,7 +91,7 @@ __global__ void free_world(hitable **d_list, hitable **d_world) {
 int main() {
     int nx = 1200;
     int ny = 800;
-    int ns = 10;
+    // int ns = 10;
     int tx = 8;//divisoes que vai ser cortada a imagem
     int ty = 8;//divisoes que vai ser cortada a imagem
     int num_pixels = nx*ny;
@@ -110,7 +110,7 @@ int main() {
 
     dim3 block_size(nx/tx+1,ny/ty+1);//tamanho de cada grid
     dim3 size_grid(tx,ty);//tamanho do grid
-    render<<<block_size, size_grid>>>(fb, nx, ny, vec3(-2.0, -1.0, -1.0), vec3(4.0, 0.0, 0.0), vec3(0.0, 2.0, 0.0), vec3(0.0, 0.0, 0.0));//manda para a GPU calcular
+    render<<<block_size, size_grid>>>(fb, nx, ny, vec3(-2.0, -1.0, -1.0), vec3(4.0, 0.0, 0.0), vec3(0.0, 2.0, 0.0), vec3(0.0, 0.0, 0.0),d_world);//manda para a GPU calcular
     cudaGetLastError();
     cudaDeviceSynchronize();
 
