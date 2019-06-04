@@ -85,11 +85,9 @@ int main() {
 
     dim3 block_size(nx/tx+1,ny/ty+1);//tamanho de cada grid
     dim3 size_grid(tx,ty);//tamanho do grid
-    std::cerr << "aqui1 \n";
     render<<<block_size, size_grid>>>(fb, nx, ny, vec3(-2.0, -1.0, -1.0), vec3(4.0, 0.0, 0.0), vec3(0.0, 2.0, 0.0), vec3(0.0, 0.0, 0.0));//manda para a GPU calcular
     cudaGetLastError();
     cudaDeviceSynchronize();
-    std::cerr << "aqui2 \n";
 
     std::cout << "P3\n" << nx << " " << ny << "\n255\n";
     // hitable *list[5];
@@ -98,11 +96,10 @@ int main() {
         for (int i = 0; i < nx; i++) {
             size_t pixel_index = j*nx + i*;
 
-            std::cerr << "aqui3 \n";
             // size_t pixel_index = j*3*nx + i*3;
-            int ir = int(255.99*fb[pixel_index].r());
-            int ig = int(255.99*fb[pixel_index].g());
-            int ib = int(255.99*fb[pixel_index].b());
+            int ir = int(255.99*fb[pixel_index]);
+            int ig = int(255.99*fb[pixel_index+1]);
+            int ib = int(255.99*fb[pixel_index+2]);
             std::cout << ir << " " << ig << " " << ib << "\n";
         }
     }
