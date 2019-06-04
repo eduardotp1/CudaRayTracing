@@ -94,12 +94,12 @@ int main() {
 
     for (int j = ny-1; j >= 0; j--) {
         for (int i = 0; i < nx; i++) {
-            size_t pixel_index = j*nx*3 + i*3;
+            size_t pixel_index = j*nx + i;
 
             // size_t pixel_index = j*3*nx + i*3;
-            int ir = int(255.99*fb[pixel_index]);
-            int ig = int(255.99*fb[pixel_index+1]);
-            int ib = int(255.99*fb[pixel_index+2]);
+            int ir = int(255.99*fb[pixel_index][0]);
+            int ig = int(255.99*fb[pixel_index][1]);
+            int ib = int(255.99*fb[pixel_index][2]);
             std::cout << ir << " " << ig << " " << ib << "\n";
         }
     }
