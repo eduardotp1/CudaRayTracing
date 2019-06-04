@@ -14,8 +14,6 @@
 #include "sphere.h"
 #include "hitable_list.h"
 #include "float.h"
-// #include "camera.h"
-// #include "material.h"
 #include "vec3.h"
 #include "ray.h"
 #include <chrono>
@@ -65,7 +63,7 @@ __device__ vec3 color(const ray& r, hitable **world) {
 // }
 
 // pinta a imagem
-__global__ void render(vec3 *fb, int max_x, int max_y,vec3 lower_left_corner, vec3 horizontal, vec3 vertical, vec3 origin, hitable **world) {
+__global__ void rgb(vec3 *fb, int max_x, int max_y,vec3 lower_left_corner, vec3 horizontal, vec3 vertical, vec3 origin, hitable **world) {
     int i = threadIdx.x + blockIdx.x * blockDim.x;
     int j = threadIdx.y + blockIdx.y * blockDim.y;
     if((i >= max_x) || (j >= max_y)) return;
@@ -77,19 +75,19 @@ __global__ void render(vec3 *fb, int max_x, int max_y,vec3 lower_left_corner, ve
 }
 
 // instancia as esferas
-__global__ void create_world(hitable **d_list, hitable **d_world) {
+__global__ void create_sphere(hitable **d_list, hitable **d_world) {
     if (threadIdx.x == 0 && blockIdx.x == 0) {
         *(d_list)   = new sphere(vec3(0,0,-1), 0.5);
         *(d_list+1) = new sphere(vec3(0,-100.5,-1), 100);
         *(d_list+2)   = new sphere(vec3(1, 0.2,-1), 0.5);
-        *(d_list+3) = new sphere(vec3(1, 0.2,-1), 0.5);
-        *(d_list+4)   = new sphere(vec3(1, 0.2,-1), 0.5);
-        *(d_list+5) = new sphere(vec3(1, 0.2,-1), 0.5);
+        *(d_list+3) = new sphere(vec3(2, -50,-1), 10);
+        *(d_list+4)   = new sphere(vec3(6, 30,-1), 0.5);
+        *(d_list+5) = new sphere(vec3(10, 0.2,-1), 0.5);
         *d_world    = new hitable_list(d_list,6);
     }
 }
 // deleta memorias
-__global__ void free_world(hitable **d_list, hitable **d_world) {
+__global__ void free_memory(hitable **d_list, hitable **d_world) {
     delete *(d_list);
     delete *(d_list+1);
     delete *d_world;
@@ -113,12 +111,12 @@ int main() {
     cudaMalloc((void **)&d_list, 6*sizeof(hitable *));
     hitable **d_world;
     cudaMalloc((void **)&d_world, sizeof(hitable *));
-    create_world<<<1,1>>>(d_list,d_world);
+    create_sphere<<<1,1>>>(d_list,d_world);
     cudaDeviceSynchronize();
 
     dim3 block_size(nx/tx+1,ny/ty+1);//tamanho de cada grid
     dim3 size_grid(tx,ty);//tamanho do grid
-    render<<<block_size, size_grid>>>(fb, nx, ny, vec3(-2.0, -1.0, -1.0), vec3(4.0, 0.0, 0.0), vec3(0.0, 2.0, 0.0), vec3(0.0, 0.0, 0.0),d_world);//manda para a GPU calcular
+    rgb<<<block_size, size_grid>>>(fb, nx, ny, vec3(-2.0, -1.0, -1.0), vec3(4.0, 0.0, 0.0), vec3(0.0, 2.0, 0.0), vec3(0.0, 0.0, 0.0),d_world);//manda para a GPU calcular
     cudaDeviceSynchronize();
 
     std::cout << "P3\n" << nx << " " << ny << "\n255\n";
@@ -141,7 +139,7 @@ int main() {
     std::cerr << "Tempo: " << time_span.count();
 
     cudaDeviceSynchronize();
-    free_world<<<1,1>>>(d_list,d_world);
+    free_memory<<<1,1>>>(d_list,d_world);
     cudaFree(d_list);
     cudaFree(d_world);
     cudaFree(fb);
