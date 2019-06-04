@@ -94,7 +94,8 @@ int main() {
 
     for (int j = ny-1; j >= 0; j--) {
         for (int i = 0; i < nx; i++) {
-            size_t pixel_index = j*3*nx + i*3;
+            size_t pixel_index = j*nx + i*;
+            // size_t pixel_index = j*3*nx + i*3;
             int ir = int(255.99*fb[pixel_index].r());
             int ig = int(255.99*fb[pixel_index].g());
             int ib = int(255.99*fb[pixel_index].b());
