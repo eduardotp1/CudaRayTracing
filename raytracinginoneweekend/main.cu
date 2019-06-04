@@ -19,7 +19,7 @@
 #include "vec3.h"
 #include "ray.h"
 
-
+// traca os raios de luz
 __device__ vec3 color(const ray& r, hitable **world) {
     hit_record rec;
     if ((*world)->hit(r, 0.0, FLT_MAX, rec)) {
@@ -63,6 +63,7 @@ __device__ vec3 color(const ray& r, hitable **world) {
 //     return new hitable_list(list,i);
 // }
 
+// pinta a imagem
 __global__ void render(vec3 *fb, int max_x, int max_y,vec3 lower_left_corner, vec3 horizontal, vec3 vertical, vec3 origin, hitable **world) {
     int i = threadIdx.x + blockIdx.x * blockDim.x;
     int j = threadIdx.y + blockIdx.y * blockDim.y;
@@ -74,14 +75,19 @@ __global__ void render(vec3 *fb, int max_x, int max_y,vec3 lower_left_corner, ve
     fb[pixel_index] = color(r, world);
 }
 
+// instancia as esferas
 __global__ void create_world(hitable **d_list, hitable **d_world) {
     if (threadIdx.x == 0 && blockIdx.x == 0) {
         *(d_list)   = new sphere(vec3(0,0,-1), 0.5);
         *(d_list+1) = new sphere(vec3(0,-100.5,-1), 100);
-        *d_world    = new hitable_list(d_list,2);
+        *(d_list+2)   = new sphere(vec3(1, 0.2,-1), 0.5);
+        *(d_list+3) = new sphere(vec3(1, 0.2,-1), 0.5);
+        *(d_list+4)   = new sphere(vec3(1, 0.2,-1), 0.5);
+        *(d_list+5) = new sphere(vec3(1, 0.2,-1), 0.5);
+        *d_world    = new hitable_list(d_list,6);
     }
 }
-
+// deleta memorias
 __global__ void free_world(hitable **d_list, hitable **d_world) {
     delete *(d_list);
     delete *(d_list+1);
@@ -96,12 +102,13 @@ int main() {
     int ty = 8;//divisoes que vai ser cortada a imagem
     int num_pixels = nx*ny;
     size_t fb_size = num_pixels*sizeof(vec3);
+    high_resolution_clock::time_point begin = high_resolution_clock::now();
 
     // allocate FB
     vec3 *fb;
     cudaMallocManaged((void **)&fb, fb_size);
     hitable **d_list;
-    cudaMalloc((void **)&d_list, 2*sizeof(hitable *));
+    cudaMalloc((void **)&d_list, 6*sizeof(hitable *));
     hitable **d_world;
     cudaMalloc((void **)&d_world, sizeof(hitable *));
     create_world<<<1,1>>>(d_list,d_world);
@@ -126,6 +133,11 @@ int main() {
             std::cout << ir << " " << ig << " " << ib << "\n";
         }
     }
+    
+    high_resolution_clock::time_point end = high_resolution_clock::now();
+    duration<double> time_span = duration_cast<duration<double>>(end - begin);
+    std::cerr << "Tempo: " << time_span.count();
+
     cudaDeviceSynchronize();
     free_world<<<1,1>>>(d_list,d_world);
     cudaFree(d_list);
