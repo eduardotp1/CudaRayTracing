@@ -11,11 +11,13 @@
 //==================================================================================================
 
 #include <iostream>
-#include "sphere.h"
+// #include "sphere.h"
 #include "hitable_list.h"
 #include "float.h"
-#include "camera.h"
-#include "material.h"
+// #include "camera.h"
+// #include "material.h"
+#include "vec3.h"
+#include "ray.h"
 
 
 __device__ vec3 color(const ray& r) {
