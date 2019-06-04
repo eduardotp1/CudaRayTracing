@@ -18,11 +18,11 @@
 #include "material.h"
 
 
-// __device__ vec3 color(const ray& r) {
-//    vec3 unit_direction = unit_vector(r.direction());
-//    float t = 0.5f*(unit_direction.y() + 1.0f);
-//    return (1.0f-t)*vec3(1.0, 1.0, 1.0) + t*vec3(0.5, 0.7, 1.0);
-// }
+__device__ vec3 color(const ray& r) {
+   vec3 unit_direction = unit_vector(r.direction());
+   float t = 0.5f*(unit_direction.y() + 1.0f);
+   return (1.0f-t)*vec3(1.0, 1.0, 1.0) + t*vec3(0.5, 0.7, 1.0);
+}
 
 
 hitable *random_scene() {
@@ -56,14 +56,15 @@ hitable *random_scene() {
     return new hitable_list(list,i);
 }
 
-__global__ void render(float *fb, int max_x, int max_y) {
-    int i = threadIdx.x + blockIdx.x * blockDim.x;
-    int j = threadIdx.y + blockIdx.y * blockDim.y;
-    if((i >= max_x) || (j >= max_y)) return;
-    int pixel_index = j*max_x*3 + i*3;
-    fb[pixel_index + 0] = float(i) / max_x;
-    fb[pixel_index + 1] = float(j) / max_y;
-    fb[pixel_index + 2] = 0.2;
+__global__ void render(vec3 *fb, int max_x, int max_y, vec3 lower_left_corner, vec3 horizontal, vec3 vertical, vec3 origin) {
+   int i = threadIdx.x + blockIdx.x * blockDim.x;
+   int j = threadIdx.y + blockIdx.y * blockDim.y;
+   if((i >= max_x) || (j >= max_y)) return;
+   int pixel_index = j*max_x + i;
+   float u = float(i) / float(max_x);
+   float v = float(j) / float(max_y);
+   ray r(origin, lower_left_corner + u*horizontal + v*vertical);
+   fb[pixel_index] = color(r);
 }
 
 int main() {
@@ -76,12 +77,17 @@ int main() {
     size_t fb_size = 3*num_pixels*sizeof(float);
 
     // allocate FB
-    float *fb;
+    vec3 *fb;
+    vec3 lower_left_corner=(-2.0, -1.0, -1.0);
+    vec3 horizontal=(4.0, 0.0, 0.0);
+    vec3 vertical=(0.0, 2.0, 0.0);
+    vec3 origin=(0.0, 0.0, 0.0);
     cudaMallocManaged((void **)&fb, fb_size);
 
     dim3 block_size(nx/tx+1,ny/ty+1);//tamanho de cada grid
     dim3 size_grid(tx,ty);//tamanho do grid
-    render<<<block_size, size_grid>>>(fb, nx, ny);//manda para a GPU calcular
+
+    render<<<block_size, size_grid>>>(fb, nx, ny, lower_left_corner, horizontal, vertical, origin);//manda para a GPU calcular
     cudaGetLastError();
     cudaDeviceSynchronize();
 
@@ -91,9 +97,9 @@ int main() {
     for (int j = ny-1; j >= 0; j--) {
         for (int i = 0; i < nx; i++) {
             size_t pixel_index = j*3*nx + i*3;
-            float r = fb[pixel_index + 0];
-            float g = fb[pixel_index + 1];
-            float b = fb[pixel_index + 2];
+            vec3 r = fb[pixel_index].r();
+            vec3 g = fb[pixel_index].g();
+            vec3 b = fb[pixel_index].b();
             int ir = int(255.99*r);
             int ig = int(255.99*g);
             int ib = int(255.99*b);
