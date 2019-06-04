@@ -79,10 +79,11 @@ __global__ void create_sphere(hitable **d_list, hitable **d_world) {
     if (threadIdx.x == 0 && blockIdx.x == 0) {
         *(d_list)   = new sphere(vec3(0,0,-1), 0.5);
         *(d_list+1) = new sphere(vec3(0,-100.5,-1), 100);
-        *(d_list+2)   = new sphere(vec3(2,8,-1), 5);
-        *(d_list+3) = new sphere(vec3(0,1,-1), 3);
-        *(d_list+4)   = new sphere(vec3(-5,2,-1), 0.5);
-        *d_world    = new hitable_list(d_list,5);
+        *(d_list+2)   = new sphere(vec3(1, 0.2,-1), 0.5);
+        *(d_list+3) = new sphere(vec3(2, -4,-1), 10);
+        *(d_list+4)   = new sphere(vec3(6, 5,-1), 2);
+        *(d_list+5) = new sphere(vec3(10, 0.2,-1), 1);
+        *d_world    = new hitable_list(d_list,6);
     }
 }
 // deleta memorias
@@ -107,7 +108,7 @@ int main() {
     vec3 *fb;
     cudaMallocManaged((void **)&fb, fb_size);
     hitable **d_list;
-    cudaMalloc((void **)&d_list, 5*sizeof(hitable *));
+    cudaMalloc((void **)&d_list, 6*sizeof(hitable *));
     hitable **d_world;
     cudaMalloc((void **)&d_world, sizeof(hitable *));
     create_sphere<<<1,1>>>(d_list,d_world);
