@@ -105,13 +105,11 @@ int main() {
     hitable **d_world;
     cudaMalloc((void **)&d_world, sizeof(hitable *));
     create_world<<<1,1>>>(d_list,d_world);
-    cudaGetLastError();
     cudaDeviceSynchronize();
 
     dim3 block_size(nx/tx+1,ny/ty+1);//tamanho de cada grid
     dim3 size_grid(tx,ty);//tamanho do grid
     render<<<block_size, size_grid>>>(fb, nx, ny, vec3(-2.0, -1.0, -1.0), vec3(4.0, 0.0, 0.0), vec3(0.0, 2.0, 0.0), vec3(0.0, 0.0, 0.0),d_world);//manda para a GPU calcular
-    cudaGetLastError();
     cudaDeviceSynchronize();
 
     std::cout << "P3\n" << nx << " " << ny << "\n255\n";
@@ -130,7 +128,6 @@ int main() {
     }
     cudaDeviceSynchronize();
     free_world<<<1,1>>>(d_list,d_world);
-    cudaGetLastError();
     cudaFree(d_list);
     cudaFree(d_world);
     cudaFree(fb);
