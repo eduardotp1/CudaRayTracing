@@ -78,10 +78,10 @@ int main() {
 
     // allocate FB
     vec3 *fb;
-    vec3 lower_left_corner=(-2.0, -1.0, -1.0);
-    vec3 horizontal=(4.0, 0.0, 0.0);
-    vec3 vertical=(0.0, 2.0, 0.0);
-    vec3 origin=(0.0, 0.0, 0.0);
+    double lower_left_corner=vec3(-2.0, -1.0, -1.0);
+    double horizontal=vec3(4.0, 0.0, 0.0);
+    double vertical=vec3(0.0, 2.0, 0.0);
+    double origin=vec3(0.0, 0.0, 0.0);
     cudaMallocManaged((void **)&fb, fb_size);
 
     dim3 block_size(nx/tx+1,ny/ty+1);//tamanho de cada grid
@@ -97,9 +97,9 @@ int main() {
     for (int j = ny-1; j >= 0; j--) {
         for (int i = 0; i < nx; i++) {
             size_t pixel_index = j*3*nx + i*3;
-            vec3 r = fb[pixel_index].r();
-            vec3 g = fb[pixel_index].g();
-            vec3 b = fb[pixel_index].b();
+            int r = fb[pixel_index].r();
+            int g = fb[pixel_index].g();
+            int b = fb[pixel_index].b();
             int ir = int(255.99*r);
             int ig = int(255.99*g);
             int ib = int(255.99*b);
